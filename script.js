@@ -464,18 +464,58 @@ function renderGenres(genres) {
     return '';
   }
 
+  // Prepare data for Chart.js
+  const labels = Object.keys(genres);
+  const data = Object.values(genres);
+
+  // Generate a random color for each genre
+  const backgroundColors = labels.map(() =>
+    `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
+  );
+
+  // Chart container and canvas
+  setTimeout(() => {
+    const ctx = document.getElementById('genrePieChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: backgroundColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  return `${label}: ${value}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  }, 0);
+
   return `
-        <h3 class="section-header">
-            <i class="fas fa-tags"></i>
-            Favorite Genres
-        </h3>
-        <ul class="genre-list">
-            ${Object.entries(genres)
-      .sort(([, a], [, b]) => b - a)
-      .map(([genre, count]) => `<li>${escapeHtml(genre)} (${count})</li>`)
-      .join("")}
-        </ul>
-    `;
+    <h3 class="section-header">
+      <i class="fas fa-tags"></i>
+      Favorite Genres
+    </h3>
+    <div style="width:100%;max-width:400px;margin:auto;">
+      <canvas id="genrePieChart" width="400" height="400"></canvas>
+    </div>
+  `;
 }
 
 function renderGallery(images, galleryImgs) {
@@ -493,7 +533,7 @@ function renderGallery(images, galleryImgs) {
                 <img class="gallery-img" 
                      src="${getImageUrl(img.file_path, 'w300')}" 
                      alt="Gallery photo ${idx + 1}" 
-                     onclick="openModal(${JSON.stringify(galleryImgs)}, ${idx})"
+                     onclick="openModal([${galleryImgs.map(url => `'${url}'`).join(',')}], ${idx})"
                      loading="lazy">
             `).join("")}
         </div>
@@ -681,14 +721,14 @@ function renderMovieGallery(posters, backdrops, allImgs) {
                 <img class="gallery-img" 
                      src="${url.replace('/original', '/w300')}" 
                      alt="Movie poster ${idx + 1}"
-                     onclick="openModal(${JSON.stringify(allImgs)}, ${idx})"
+                     onclick="openModal([${allImgs.map(u => `'${u}'`).join(',')}], ${idx})"
                      loading="lazy">
             `).join("")}
             ${backdrops.map((url, idx) => `
                 <img class="gallery-img" 
                      src="${url.replace('/original', '/w300')}" 
                      alt="Movie backdrop ${idx + 1}"
-                     onclick="openModal(${JSON.stringify(allImgs)}, ${posters.length + idx})"
+                     onclick="openModal([${allImgs.map(u => `'${u}'`).join(',')}], ${posters.length + idx})"
                      loading="lazy">
             `).join("")}
         </div>
