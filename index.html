@@ -3,55 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎬 Director Explorer</title>
+  <title>🎬 Director Explorer Pro</title>
   <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+  <!-- Navigation Header -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <i class="fas fa-film brand-icon"></i>
+        <span class="brand-text">Director Explorer Pro</span>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="nav-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
   <div class="container">
-    <header class="header">
-      <h1 class="title">
-        <i class="fas fa-film"></i>
-        Director Explorer
-      </h1>
-      <p class="subtitle">Discover the world's greatest film directors</p>
+    <!-- Hero Section -->
+    <header class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Discover Cinema's Greatest Visionaries
+        </h1>
+        <p class="hero-subtitle">
+          Explore comprehensive profiles, filmographies, and collaborations of the world's most influential directors
+        </p>
+      </div>
     </header>
 
-    <div class="search-section">
+    <!-- Advanced Search Section -->
+    <section class="search-section">
       <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for a director..." class="search-input">
-        <button onclick="searchDirector()" class="search-btn">
-          <i class="fas fa-search"></i>
-          Search
-        </button>
+        <div class="search-input-group">
+          <div class="search-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search for directors, films, or genres..." 
+            class="search-input"
+            autocomplete="off"
+          >
+          <button onclick="searchDirector()" class="search-btn" aria-label="Search">
+            <span class="btn-text">Search</span>
+            <i class="fas fa-arrow-right btn-icon"></i>
+          </button>
+        </div>
+        
+        <!-- Search Suggestions -->
+        <div id="searchSuggestions" class="search-suggestions"></div>
+        
+        <!-- Quick Filters -->
+        <div class="quick-filters">
+          <span class="filter-label">Popular:</span>
+          <button class="filter-chip" onclick="quickSearch('Christopher Nolan')">Christopher Nolan</button>
+          <button class="filter-chip" onclick="quickSearch('Martin Scorsese')">Martin Scorsese</button>
+          <button class="filter-chip" onclick="quickSearch('Quentin Tarantino')">Quentin Tarantino</button>
+          <button class="filter-chip" onclick="quickSearch('Steven Spielberg')">Steven Spielberg</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Container -->
+    <main id="results" class="results-container" role="main">
+      <!-- Welcome State -->
+      <div class="welcome-state">
+        <div class="welcome-icon">
+          <i class="fas fa-video"></i>
+        </div>
+        <h2>Welcome to Director Explorer Pro</h2>
+        <p>Start your journey by searching for your favorite directors above</p>
+      </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-overlay" style="display: none;">
+      <div class="loading-content">
+        <div class="loading-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+        </div>
+        <p class="loading-text">Loading amazing content...</p>
       </div>
     </div>
 
-    <div id="results" class="results-container"></div>
-
-    <!-- Loading spinner -->
-    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
-      <div class="spinner"></div>
-      <p>Loading...</p>
-    </div>
-
-    <!-- Modal for image gallery -->
-    <div id="imgModal" class="modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="closeModal()">
+    <!-- Image Modal -->
+    <div id="imgModal" class="modal-overlay">
+      <div class="modal-container">
+        <button class="modal-close" onclick="closeModal()" aria-label="Close modal">
           <i class="fas fa-times"></i>
         </button>
-        <button class="modal-nav modal-prev" onclick="prevModalImg()">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <img id="modalImg" src="/placeholder.svg" alt="Gallery Image" class="modal-image">
-        <button class="modal-nav modal-next" onclick="nextModalImg()">
-          <i class="fas fa-chevron-right"></i>
-        </button>
+        
+        <div class="modal-content">
+          <button class="modal-nav modal-prev" onclick="prevModalImg()" aria-label="Previous image">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="modal-image-container">
+            <img id="modalImg" src="/placeholder.svg" alt="Gallery Image" class="modal-image">
+            <div class="modal-caption">
+              <span id="modalCaption"></span>
+              <span id="modalCounter" class="modal-counter"></span>
+            </div>
+          </div>
+          
+          <button class="modal-nav modal-next" onclick="nextModalImg()" aria-label="Next image">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTop" class="scroll-to-top" onclick="scrollToTop()" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
   </div>
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <script src="script.js"></script>
 </body>

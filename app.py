@@ -24,14 +24,19 @@ def tmdb_get(endpoint, params=None):
 
 
 def format_date(date_str):
-    """Format date from yyyy-mm-dd to dd-mm-yyyy"""
-    if not date_str:
+    """Format date from yyyy-mm-dd or dd-mm-yyyy to '15 September 2025'."""
+    if not date_str or date_str in ("N/A", "None", ""):
         return "N/A"
     try:
+        # Try yyyy-mm-dd
         dt = datetime.strptime(date_str, "%Y-%m-%d")
-        return dt.strftime("%d-%m-%Y")
     except Exception:
-        return date_str
+        try:
+            # Try dd-mm-yyyy
+            dt = datetime.strptime(date_str, "%d-%m-%Y")
+        except Exception:
+            return "N/A"
+    return dt.strftime("%d %B %Y")
 
 
 # 1. Search Director
