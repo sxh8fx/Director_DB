@@ -2,270 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎬 Director Explorer</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-    h1 { color: #333; }
-    input, button { padding: 8px; margin: 5px; }
-    img { border-radius: 8px; margin-top: 5px; max-width: 150px; }
-    .director-card, .movie-card {
-      border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin: 10px 0;
-      background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    ul { list-style: none; padding: 0; }
-    li { margin: 5px 0; }
-    .poster { max-width: 200px; margin-right: 10px; }
-    .flex { display: flex; flex-wrap: wrap; gap: 10px; }
-    .collab-img { max-width: 100px; max-height: 100px; border-radius: 50%; margin: 5px; }
-    .collab-card { display: inline-block; text-align: center; margin: 5px 10px; }
-    .gallery-img { max-width: 120px; max-height: 120px; margin: 5px; border-radius: 10px; cursor: pointer; }
-    .back-btn { margin-bottom: 10px; }
-    /* Modal styles */
-    #imgModal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; }
-    #imgModal img { max-width:90vw; max-height:80vh; display:block; margin:auto; }
-    #imgModal .close, #imgModal .prev, #imgModal .next {
-      position:absolute; top:50%; transform:translateY(-50%); color:#fff; font-size:2em; background:none; border:none; cursor:pointer; z-index:1001;
-    }
-    #imgModal .close { top:10px; right:20px; font-size:2em; transform:none; }
-    #imgModal .prev { left:20px; }
-    #imgModal .next { right:20px; }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <h1>🎬 Director Search</h1>
-  <input type="text" id="searchInput" placeholder="Enter director name">
-  <button onclick="searchDirector()">Search</button>
-  <div id="results"></div>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">
+        <i class="fas fa-film"></i>
+        Director Explorer
+      </h1>
+      <p class="subtitle">Discover the world's greatest film directors</p>
+    </header>
 
-  <!-- Modal for image gallery -->
-  <div id="imgModal">
-    <button class="close" onclick="closeModal()">&times;</button>
-    <button class="prev" onclick="prevModalImg()">&#8592;</button>
-    <img id="modalImg" src="">
-    <button class="next" onclick="nextModalImg()">&#8594;</button>
+    <div class="search-section">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for a director..." class="search-input">
+        <button onclick="searchDirector()" class="search-btn">
+          <i class="fas fa-search"></i>
+          Search
+        </button>
+      </div>
+    </div>
+
+    <div id="results" class="results-container"></div>
+
+    <!-- Loading spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Modal for image gallery -->
+    <div id="imgModal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+        <button class="modal-nav modal-prev" onclick="prevModalImg()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <img id="modalImg" src="/placeholder.svg" alt="Gallery Image" class="modal-image">
+        <button class="modal-nav modal-next" onclick="nextModalImg()">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <script>
-    const API_BASE = "http://127.0.0.1:5000";
-    const BLANK_IMG = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-    const UNNAMED_IMG = "./unnamed.png"; // Place this image in your project directory
-    const NOIMAGE_IMG = "noimageavailable.jpg"; // Place this image in your project directory
-
-    // Language code to name mapping (add more as needed)
-    const LANG_MAP = {
-      en: "English", ta: "Tamil", hi: "Hindi", fr: "French", es: "Spanish",
-      ja: "Japanese", ko: "Korean", de: "German", it: "Italian", ru: "Russian", zh: "Chinese"
-    };
-
-    let lastSearchResults = null;
-    let lastDirectorId = null;
-
-    // For modal gallery
-    let modalImgs = [];
-    let modalIdx = 0;
-
-    function openModal(imgArr, idx) {
-      modalImgs = imgArr;
-      modalIdx = idx;
-      document.getElementById('imgModal').style.display = 'flex';
-      showModalImg();
-    }
-    function showModalImg() {
-      document.getElementById('modalImg').src = modalImgs[modalIdx];
-    }
-    function closeModal() {
-      document.getElementById('imgModal').style.display = 'none';
-      modalImgs = [];
-      modalIdx = 0;
-    }
-    function prevModalImg() {
-      if (modalImgs.length) {
-        modalIdx = (modalIdx - 1 + modalImgs.length) % modalImgs.length;
-        showModalImg();
-      }
-    }
-    function nextModalImg() {
-      if (modalImgs.length) {
-        modalIdx = (modalIdx + 1) % modalImgs.length;
-        showModalImg();
-      }
-    }
-
-    // 🔎 Search director
-    async function searchDirector() {
-      const name = document.getElementById("searchInput").value;
-      const res = await fetch(`${API_BASE}/search_director?name=${encodeURIComponent(name)}`);
-      const data = await res.json();
-      lastSearchResults = data;
-      renderSearchResults(data);
-    }
-
-    function renderSearchResults(data) {
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
-      if (data.results && data.results.length > 0) {
-        data.results.forEach(director => {
-          const div = document.createElement("div");
-          div.classList.add("director-card");
-          div.innerHTML = `
-            <h3>${director.name}</h3>
-            <img src="${director.profile_path ? `https://image.tmdb.org/t/p/w200${director.profile_path}` : UNNAMED_IMG}" alt="${director.name}">
-            <br>
-            <button onclick="loadDetails(${director.id})">View Details</button>
-          `;
-          resultsDiv.appendChild(div);
-        });
-      } else {
-        resultsDiv.innerHTML = "<p>No director found.</p>";
-      }
-    }
-
-    // 📄 Load director details + movies + genres + collaborators + images
-    async function loadDetails(id) {
-      lastDirectorId = id;
-      const [resDetails, resMovies, resGenres, resCollab, resImages] = await Promise.all([
-        fetch(`${API_BASE}/director/${id}`),
-        fetch(`${API_BASE}/director/${id}/movies`),
-        fetch(`${API_BASE}/director/${id}/genres`),
-        fetch(`${API_BASE}/director/${id}/collaborators`),
-        fetch(`${API_BASE}/director/${id}/images`)
-      ]);
-
-      const details = await resDetails.json();
-      const movies = await resMovies.json();
-      const genres = await resGenres.json();
-      const collabs = await resCollab.json();
-      const images = await resImages.json();
-
-      // Prepare gallery images for modal
-      const galleryImgs = (images.profiles || []).slice(0, 6).map(img =>
-        `https://image.tmdb.org/t/p/original${img.file_path}`
-      );
-
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = `
-        <button class="back-btn" onclick="renderSearchResults(lastSearchResults)">🔙 Back</button>
-        <h2>${details.name}</h2>
-        <img src="${details.profile_path ? `https://image.tmdb.org/t/p/w300${details.profile_path}` : UNNAMED_IMG}" alt="${details.name}">
-        <p><strong>Born:</strong> ${details.birthday || "N/A"} in ${details.place_of_birth || "Unknown"}</p>
-        <p><strong>Biography:</strong> ${details.biography || "No biography available."}</p>
-        
-        <h3>👥 Frequent Collaborators</h3>
-        <div>
-          <strong>Actors:</strong>
-          <div class="flex">
-            ${(collabs.actors || []).slice(0,6).map(a => `
-              <div class="collab-card">
-                <img class="collab-img" src="${a.profile_path ? `https://image.tmdb.org/t/p/w200${a.profile_path}` : UNNAMED_IMG}" alt="${a.name}">
-                <div>${a.name} (${a.count})</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-        <div>
-          <strong>Writers:</strong>
-          <div class="flex">
-            ${(collabs.writers || []).slice(0,6).map(w => `
-              <div class="collab-card">
-                <img class="collab-img" src="${w.profile_path ? `https://image.tmdb.org/t/p/w200${w.profile_path}` : UNNAMED_IMG}" alt="${w.name}">
-                <div>${w.name} (${w.count})</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-
-        <h3>🎬 Filmography</h3>
-        <div class="flex">
-          ${movies.filmography.map(m => `
-            <div class="movie-card">
-              <p><strong>${m.title}</strong> (${m.release_date || "N/A"})</p>
-              <img class="poster" src="${m.poster_path ? `https://image.tmdb.org/t/p/w200${m.poster_path}` : NOIMAGE_IMG}" alt="${m.title}">
-              <br><button onclick="loadMovie(${m.id}, ${id})">More Details</button>
-            </div>
-          `).join("")}
-        </div>
-
-        <h3>📚 Aggregate Genres</h3>
-        <ul>
-          ${Object.entries(genres).map(([g, count]) => `<li>${g} (${count})</li>`).join("")}
-        </ul>
-        
-        <h3>📸 Director Gallery</h3>
-        <div class="flex">
-          ${(images.profiles || []).slice(0, 6).map((img, idx) =>
-            `<img class="gallery-img" src="https://image.tmdb.org/t/p/w300${img.file_path}" alt="Gallery" onclick="openModal(${JSON.stringify(galleryImgs)},${idx})">`
-          ).join("")}
-        </div>
-      `;
-    }
-
-    // 🎥 Load movie details (runtime, genres, cast/crew, similar movies, images)
-    async function loadMovie(movieId, directorId = null) {
-      const res = await fetch(`${API_BASE}/movie/${movieId}`);
-      const movie = await res.json();
-
-      // Language code to name (always show full name if possible)
-      const lang = LANG_MAP[movie.original_language] || movie.original_language;
-
-      // Prepare posters/backdrops for modal
-      const posters = (movie.images.posters || []).slice(0,5).map(p => `https://image.tmdb.org/t/p/original${p.file_path}`);
-      const backdrops = (movie.images.backdrops || []).slice(0,5).map(b => `https://image.tmdb.org/t/p/original${b.file_path}`);
-      const allImgs = posters.concat(backdrops);
-
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = `
-        <button class="back-btn" onclick="loadDetails(${directorId || lastDirectorId || 'null'})">🔙 Back</button>
-        <h2>${movie.title}</h2>
-        <img class="poster" src="${movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : NOIMAGE_IMG}" alt="${movie.title}">
-        <p><strong>Release Date:</strong> ${movie.release_date}</p>
-        <p><strong>Budget:</strong> $${movie.budget}</p>
-        <p><strong>Runtime:</strong> ${movie.runtime} min</p>
-        <p><strong>Language:</strong> ${lang}</p>
-
-        <h3>Genres</h3>
-        <ul>${(movie.genres || []).map(g => `<li>${g.name}</li>`).join("")}</ul>
-
-        <h3>Cast (Top 5)</h3>
-        <div class="flex">
-          ${(movie.credits.cast || []).slice(0,5).map(c => `
-            <div class="collab-card">
-              <img class="collab-img" src="${c.profile_path ? `https://image.tmdb.org/t/p/w200${c.profile_path}` : UNNAMED_IMG}" alt="${c.name}">
-              <div>${c.name} as ${c.character}</div>
-            </div>
-          `).join("")}
-        </div>
-
-        <h3>Crew (Top 5)</h3>
-        <div class="flex">
-          ${(movie.credits.crew || []).slice(0,5).map(c => `
-            <div class="collab-card">
-              <img class="collab-img" src="${c.profile_path ? `https://image.tmdb.org/t/p/w200${c.profile_path}` : UNNAMED_IMG}" alt="${c.name}">
-              <div>${c.name} - ${c.job}</div>
-            </div>
-          `).join("")}
-        </div>
-
-        <h3>Similar Movies</h3>
-        <div class="flex">
-          ${(movie.similar.results || []).slice(0,5).map(s => `
-            <div class="movie-card" style="cursor:pointer" onclick="loadMovie(${s.id}, ${directorId || lastDirectorId || 'null'})">
-              <p><strong>${s.title}</strong></p>
-              <img class="poster" src="${s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : NOIMAGE_IMG}" alt="${s.title}">
-            </div>
-          `).join("")}
-        </div>
-
-        <h3>Posters & Backdrops</h3>
-        <div class="flex">
-          ${posters.map((url, idx) => `
-            <img class="poster" src="${url.replace('/original', '/w300')}" onclick="openModal(${JSON.stringify(allImgs)},${idx})">
-          `).join("")}
-          ${backdrops.map((url, idx) => `
-            <img class="poster" src="${url.replace('/original', '/w300')}" onclick="openModal(${JSON.stringify(allImgs)},${posters.length + idx})">
-          `).join("")}
-        </div>
-      `;
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
