@@ -1,14 +1,12 @@
-# Director_DB
+# 🎬 Director’s Cut
 
-# 🎬 Director_DB
-
-Welcome to **Director_DB** – an open-source project designed to help you explore and analyze movie directors and their works with ease. Powered by Flask for the backend and JavaScript for the frontend, Director_DB offers a seamless way to fetch, display, and interact with director/movie data.
+Welcome to **Director’s Cut** – an open-source project designed to help you explore and analyze movie directors and their works with ease. Powered by Flask for the backend and JavaScript for the frontend, Director_DB offers a seamless way to fetch, display, and interact with director/movie data.
 
 ---
 
 ## 🚀 Introduction
 
-**Director_DB** is a web-based application that allows users to search for movie directors, view their filmography, and analyze their work statistics. Whether you're a movie buff, data analyst, or developer, Director_DB makes it easy to access and visualize director information.
+**Director’s Cut** is a web-based application that allows users to search for movie directors, view their filmography, and analyze their work statistics. Whether you're a movie buff, data analyst, or developer, Director’s Cut makes it easy to access and visualize director information.
 
 ---
 
