@@ -3,7 +3,7 @@
 const API_BASE = "http://127.0.0.1:5000";
 const BLANK_IMG = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 const UNNAMED_IMG = "./unnamed.png";
-const NOIMAGE_IMG = "noimageavailable.jpg";
+const NOIMAGE_IMG = "./noimageavailable.jpg";
 
 // Language mapping
 const LANG_MAP = {
@@ -22,9 +22,8 @@ let currentTheme = localStorage.getItem('theme') || 'light';
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function () {
+  // Your initialization code here
   initializeApp();
-  setupEventListeners();
-  applyTheme(currentTheme);
 });
 
 function initializeApp() {
@@ -32,7 +31,7 @@ function initializeApp() {
   setupScrollToTop();
 
   // Setup search suggestions
-  setupSearchSuggestions();
+  setupEventListeners();
 
   // Show welcome message
   showToast('Welcome to Director Explorer Pro!', 'info');
@@ -125,6 +124,8 @@ function formatDate(dateString) {
 // Toast Notifications
 function showToast(message, type = 'info', duration = 3000) {
   const container = document.getElementById('toastContainer');
+  if (!container) return;
+
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
 
@@ -383,7 +384,7 @@ function renderCollaborators(collabs) {
         
         ${(collabs.actors && collabs.actors.length > 0) ? `
             <h4><i class="fas fa-theater-masks"></i> Actors</h4>
-            <div class="swipe-scroll">
+            <div class="swipe-scroll" style="margin-bottom: 2rem;">
                 ${collabs.actors.slice(0, 8).map(actor => `
                     <div class="collab-card">
                         <img class="collab-img big-collab-img" 
@@ -400,7 +401,7 @@ function renderCollaborators(collabs) {
         ` : ''}
         
         ${(collabs.writers && collabs.writers.length > 0) ? `
-            <h4><i class="fas fa-pen"></i> Writers</h4>
+            <h4 style="margin-top: 2rem;"><i class="fas fa-pen"></i> Writers</h4>
             <div class="swipe-scroll">
                 ${collabs.writers.slice(0, 8).map(writer => `
                     <div class="collab-card">
@@ -852,11 +853,10 @@ function toggleMobileMenu() {
 
 // Error Handling
 window.addEventListener('error', function (e) {
-  console.error('Global error:', e.error);
+  if (e.message && e.message.includes('An unexpected error occurred')) return;
   showToast('An unexpected error occurred', 'error');
 });
-
 window.addEventListener('unhandledrejection', function (e) {
-  console.error('Unhandled promise rejection:', e.reason);
+  if (e.reason && e.reason.message && e.reason.message.includes('An unexpected error occurred')) return;
   showToast('An unexpected error occurred', 'error');
 });

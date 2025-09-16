@@ -221,6 +221,13 @@ body {
     font-size: 1.1rem;
     color: var(--foreground);
     outline: none;
+    margin-right: 0.5rem;
+    /* Add this line */
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .search-input::placeholder {
@@ -1058,16 +1065,20 @@ input:focus-visible,
 }
 
 .swipe-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 1.5rem;
+    padding-bottom: 1rem;
+    scroll-snap-type: x mandatory;
     scrollbar-width: thin;
-    scrollbar-color: var(--accent) var(--muted);
+    scrollbar-color: var(--muted-foreground) var(--muted); /* Use text-muted color for thumb */
 }
 
 .swipe-scroll::-webkit-scrollbar {
     height: 8px;
     background: var(--muted);
 }
-
 .swipe-scroll::-webkit-scrollbar-thumb {
-    background: var(--accent);
+    background: var(--muted-foreground); /* Use text-muted color for thumb */
     border-radius: 4px;
 }
