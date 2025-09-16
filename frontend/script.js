@@ -1,10 +1,9 @@
 // Enhanced Director Explorer Pro - JavaScript
 // API Configuration
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://directorbackend.onrender.com";
 const BLANK_IMG = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 const UNNAMED_IMG = "./unnamed.png";
 const NOIMAGE_IMG = "./noimageavailable.jpg";
-document.getElementById("currentYear").textContent = new Date().getFullYear();
 // Language mapping
 const LANG_MAP = {
   en: "English", ta: "Tamil", hi: "Hindi", fr: "French", es: "Spanish",
