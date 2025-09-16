@@ -1071,14 +1071,35 @@ input:focus-visible,
     padding-bottom: 1rem;
     scroll-snap-type: x mandatory;
     scrollbar-width: thin;
-    scrollbar-color: var(--muted-foreground) var(--muted); /* Use text-muted color for thumb */
+    scrollbar-color: var(--muted-foreground) var(--muted);
+    /* Use text-muted color for thumb */
 }
 
 .swipe-scroll::-webkit-scrollbar {
     height: 8px;
     background: var(--muted);
 }
+
 .swipe-scroll::-webkit-scrollbar-thumb {
-    background: var(--muted-foreground); /* Use text-muted color for thumb */
+    background: var(--muted-foreground);
+    /* Use text-muted color for thumb */
     border-radius: 4px;
+}
+
+.footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-color, #444);
+    background: var(--footer-bg, #f8f8f8);
+}
+
+.footer a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer a:hover {
+    text-decoration: underline;
 }
